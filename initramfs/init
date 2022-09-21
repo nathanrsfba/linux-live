@@ -7,7 +7,7 @@ export PATH=.:/:/usr/sbin:/usr/bin:/sbin:/bin
 . /lib/config
 . /lib/livekitlib
 
-transfer_initramfs
+transfer_initramfs $*
 
 MEMORY=/memory
 CHANGES=$MEMORY/changes
@@ -61,7 +61,7 @@ fstab_create "$UNION" "$DATAMNT"
 user_preinit "$DATA" "$UNION"
 
 header "Live Kit done, starting $LIVEKITNAME"
-change_root "$UNION"
+change_root "$UNION" $*
 
 header "!!ERROR occured, you shouldn't be here.!!"
 /bin/sh
