@@ -4,21 +4,56 @@
 #
 # Lines containing # are ignored
 #
-Thank you for using mylinux!
-If you are reading this from a CD, it is already bootable.
-Steps to make it bootable from your USB device are following:
+Hello, and welcome to SlakResQ.
 
-1) Copy the entire /mylinux/ directory to your USB drive.
-   If you are using Windows, you will get for example E:\mylinux\
-   You probably already did this - just make sure you are on your
-   USB drive now and not on your local harddisk.
+This is a USB-bootable live Slackware distribution, based on Tomas Matejicek's
+Linux Live Kit.
 
-2) Now navigate to directory /mylinux/boot/ on your USB drive.
-   In Windows, it will be E:\mylinux\boot\ for example.
-   Use explorer or any other file manager for this task.
+This is built with the same live kit used to build Slax. Whereas Slax is a
+fairly minimal distribution, which can be customized by installing packages,
+SlakResQ is designed to be a more or less full (yet modular) Slackware
+install out of the box. It also has some of the same features of Slax -- such
+as the ability to preserve changes to the filesystem between reboots, even on
+USB sticks with FAT filesystems.
 
-3) While you're in the boot directory, locate file bootinst.bat
-   Run it by doubleclicking it. It will setup your USB to boot.
+As the name implies, this was originally designed as a 'rescue' boot disk, for
+repairing crashed systems. However, as a full (depending on how this
+particulary copy was built) Slackware installation, it has all the power of
+Slackware available to it.
 
--- That's it. Your USB device is now ready to boot mylinux.
--- You can safely delete this file (readme.txt), it's not needed.
+SlakResQ Tweaks
+---------------
+
+While this is more or less a 'stock' Slackware install, a few amenities have
+been added:
+
+* Several default boot configurations will now boot directly into X without
+  updating inittab
+* When starting X with startx (or a display manager that doesn't offer
+  selection of sessions), the default session is a script that tries to pick
+  the best session available based on what is installed (which can change from
+  boot to boot depending on bundle selection)
+* When starting for the first time, the root password will be set to a random
+  password, a regular user will be created with the same password, and a
+  message will be displayed with login details at the first login prompt. If X
+  is installed, the new user will be automatically logged in, with a similar
+  message displayed. Both messages will disappear once either account password
+  has been changed (or a new user added)
+
+Installing onto USB
+-------------------
+
+If you're using a computer with an EFI BIOS (who isn't nowadays?) you can
+simply copy the entire contents of this folder to the root of a USB stick, and
+your computer should be able to boot from it. You may need to activate a menu
+on boot to tell the computer to boot from the USB stick; this procedure varies
+between manufacturers.
+
+If you're trying to boot off an older machine without EFI support, you'll need
+to go into the slakresq/boot folder and run bootinst.bat (on Windows) or
+bootinst.sh (on Linux) to install a bootloader to the USB stick. This may
+generate an error about not being able to move the EFI folder; this is normal,
+as the EFI folder has already been moved into the appropriate place.
+
+Booting from CD/DVD is currently not supported.
+
