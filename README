@@ -1,3 +1,21 @@
+Linux Live Kit Fork
+===================
+
+This is a fork of Tomas Matejicek's Linux Live Kit. The purpose of this fork
+is for me to experiment with some tweaks and fixes of my own.
+
+Currently, the following changes have been made to the original code:
+
+* The shutdown script in initramfs now calls poweroff with the '-f' argument,
+  which fixes the bug causing reboots instead of poweroffs
+* The boot scripts now pass parameters from the bootloader to the 'real' init
+  process. This enables setting the runlevel from the boot prompt.
+
+These changes have all been broken out into individual branches, so they may
+be individually merged into the upstream if desired.
+
+- Nathan Roberts <nathanr@tardislabs.com>
+
 Linux Live Kit
 ==============
 
