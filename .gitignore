@@ -1,4 +1,3 @@
-# Various backups and garbage
-*.swp
+# Garbage backup/temp files
 *~
-
+.*.swp
