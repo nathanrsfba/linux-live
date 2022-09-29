@@ -36,6 +36,16 @@ MKMOD="bin etc home lib lib64 opt root sbin srv usr var"
 # To enable, set to true
 NETWORK=false
 
+# Try to fsck the source media on boot (and the persistent changes image if
+# appropriate). Recommended if you're booting off a USB stick or other writable
+# media.
+BOOTFSCK=true
+
+# fsck tools to include in the initramfs if BOOTFSCK is enabled (not including
+# fsck for EXT? filesystems which are always included). These tools must exist
+# in the Linux installation you're building.
+FSCKTOOLS="e2fsck fsck.ext2 fsck.ext3 fsck.ext4 fsck.fat fsck.msdos fsck.vfat"
+
 # Temporary directory to store livekit filesystem
 LIVEKITDATA=/tmp/$LIVEKITNAME-data-$$
 
