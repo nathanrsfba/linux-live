@@ -10,6 +10,8 @@ Currently, the following changes have been made to the original code:
   which fixes the bug causing reboots instead of poweroffs
 * The boot scripts now pass parameters from the bootloader to the 'real' init
   process. This enables setting the runlevel from the boot prompt.
+* Boot scripts will now try to fsck the source media (and persistence image)
+  on boot, if enabled in config.
 
 These changes have all been broken out into individual branches, so they may
 be individually merged into the upstream if desired.
