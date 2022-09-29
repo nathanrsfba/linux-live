@@ -548,6 +548,14 @@ find_data_try()
 
       $MOUNT "$DEVICE" "$1" $OPTIONS 2>/dev/null
 
+      # If this device looks like the source media, see if we should
+      # fsck it
+      if [ $BOOTFSCK = "true" -a -e "$1/$FROM" ]; then
+          umount "$DEVICE"
+          fsck_device "$DEVICE" >&2
+          $MOUNT "$DEVICE" "$1" $OPTIONS 2>/dev/null
+      fi
+
       # if the FROM parameter is actual file, mount it again as loop (eg. iso)
       if [ -f "$1/$FROM" ]; then
          mkdir -p "$1/../iso"
@@ -624,6 +632,19 @@ check_data_found()
    fi
 }
 
+# Run fsck on the specified device
+# $1 = device
+fsck_device()
+{
+   FS="$(device_tag "$1" TYPE | tr [A-Z] [a-z])"
+   if [ -x /sbin/"fsck.$FS" ]; then
+       echo ""
+       echo "* Checking filesystem on $1"
+       /sbin/"fsck.$FS" -p "$1"
+   fi
+
+   return 0
+}
 
 # Activate persistent changes
 # $1 = data directory
@@ -683,6 +704,11 @@ persistent_changes()
    @mount.dynfilefs "$CHANGES/changes.dat" 4000 "$2"
    if [ ! "$EXISTS" ]; then
       mke2fs -F "$2/loop.fs" >/dev/null 2>&1
+   fi
+
+   if [ $BOOTFSCK = "true" ]; then
+       echo "* Checking persistence image..."
+       e2fsck -p "$2/loop.fs"
    fi
    mount -o loop,sync "$2/loop.fs" "$2"
 
