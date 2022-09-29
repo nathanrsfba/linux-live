@@ -126,6 +126,12 @@ copy_including_deps /$LMK/updates
 
 copy_including_deps /$LMK/modules.*
 
+# copy fsck tools if enabled
+if [ "$BOOTFSCK" = "true" ]; then
+    for tool in $FSCKTOOLS; do
+        copy_including_deps /sbin/$tool
+    done
+fi
 
 find $INITRAMFS -name "*.ko.gz" -exec gunzip {} \;
 
