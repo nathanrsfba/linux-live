@@ -701,55 +701,62 @@ take_snapshot()
 {
    local SNAPNUM
 
-    debug_log "take_snapshot" "$*"
+   debug_log "take_snapshot" "$*"
+   debug_shell
 
-    # FIXME: This needs to be tested with aufs, and adapted for
-    # native persistent changes
-
-   if grep -vq snapshot /proc/cmdline; then
+    # Exit if snapshot not requested
+    if grep -vq snapshot /proc/cmdline; then
        return 0
+    fi
+
+   # Exit if nothing in changes directory
+   if [ `ls -1 -A "$2" | wc -l` = 0 ]; then
+      return 0
    fi
 
-   if [ ! -e "$2/changes.dat" ]; then
-       return 0
-   fi
-
+   # Exit if snapshot isn't enabled in config
    if [ "$SNAPSHOTS" != "true" ]; then
-       return 0
+      return 0
    fi
 
    debug_shell
-    echo_green_star
-    echo "Taking snapshot of persistent changes..."
+   echo_green_star
+   echo "Taking snapshot of persistent changes..."
 
-    cd "$1"
+   cd "$1"
 
-    # Find the number of the last snapshot file
-    SNAPNUM=`find -maxdepth 1 -name "9??-snap.*" | sed 's/.*\///' | sed 's/-.*//' | sort | tail`
-    if [ x$SNAPNUM = x ]; then
-        SNAPNUM=900
-    else
-        SNAPNUM=$(($SNAPNUM + 1))
-    fi
+   # Find the number of the last snapshot file
+   SNAPNUM=`find -maxdepth 1 -name "9??-snap.*" | sed 's/.*\///' | sed 's/-.*//' | sort | tail`
+   if [ x$SNAPNUM = x ]; then
+      SNAPNUM=900
+   else
+      SNAPNUM=$(($SNAPNUM + 1))
+   fi
 
-    mkdir -p /tmp/extch
-    @mount.dynfilefs "$2/changes.dat" 4000 /tmp/extch || return 1
-    mount -o loop,ro -t ext2 /tmp/extch/loop.fs /tmp/extch || return 1
-    cd /tmp/extch
-    if [ -d changes ]; then
-        cd changes
-    fi
-   debug_shell
+   if [ -e "$2/changes.dat" ]; then
+      mkdir -p /tmp/extch
+      @mount.dynfilefs "$2/changes.dat" 4000 /tmp/extch || return 1
+      mount -o loop,ro -t ext2 /tmp/extch/loop.fs /tmp/extch || return 1
+      cd /tmp/extch
+      if [ -d changes ]; then
+         # overlayfs requires an extra directory level
+         cd changes
+      fi
+   else
+      # Assume we're using native persistent changes
+      cd "$2"
+   fi
 
-    create_bundle . "$1/$SNAPNUM-snap.$BEXT" || return 1
-   debug_shell
+   create_bundle . "$1/$SNAPNUM-snap.$BEXT" || return 1
 
-    cd /
-    umount /tmp/extch
-    umount /tmp/extch
-   debug_shell
+   cd /
+   if [ -d /tmp/extch ]; then
+      umount /tmp/extch
+      umount /tmp/extch
+   fi
 
-    rm "$2/changes.dat"
+   rm -rf "$2"
+   mkdir "$2"
 }
 
 # Copy content of rootcopy directory to union
