@@ -41,9 +41,8 @@ NETWORK=false
 # media.
 BOOTFSCK=true
 
-# fsck tools to include in the initramfs if BOOTFSCK is enabled (not including
-# fsck for EXT? filesystems which are always included). These tools must exist
-# in the Linux installation you're building.
+# fsck tools to include in the initramfs if BOOTFSCK is enabled. These tools
+# must exist in the Linux installation you're building.
 FSCKTOOLS="e2fsck fsck.ext2 fsck.ext3 fsck.ext4 fsck.fat fsck.msdos fsck.vfat"
 
 # Temporary directory to store livekit filesystem
