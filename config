@@ -51,5 +51,13 @@ LIVEKITDATA=/tmp/$LIVEKITNAME-data-$$
 # Bundle extension, for example 'sb' for .sb extension
 BEXT=srq
 
+# SquashFS compression options
+# The default is XZ compression, which creates tightly-compressed bundles
+SQUASHOPTS="-comp xz -b 1024K -Xbcj x86"
+# lzo might offer better performance running on older hardware
+#SQUASHOPTS="-comp lzo -b 1024K"
+# Disable compression entirely. If you only care about speed and not space.
+#SQUASHOPTS="-noI -noD -noF -noX"
+
 # Directory with kernel .ko modules, can be different in some distros
 LMK="lib/modules/$KERNEL"
