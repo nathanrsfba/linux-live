@@ -679,6 +679,8 @@ persistent_changes()
       return
    fi
 
+   take_snapshot "$1" "$CHANGES"
+
    echo_green_star
    echo "Testing persistent changes for posix compatibility"
    touch "$T1" && ln -sf "$T1" "$T2" 2>/dev/null && \
@@ -718,6 +720,76 @@ persistent_changes()
    rmdir "$2/lost+found" 2>/dev/null
 }
 
+# Snapshot change image into a new module file, and create a new
+# change image
+# $1 = bundles directory
+# $2 = changes directory on data medium
+take_snapshot()
+{
+   local SNAPNUM OPTS
+
+   debug_log "take_snapshot" "$*"
+   debug_shell
+
+    # Exit if snapshot not requested
+    if grep -vq snapshot /proc/cmdline; then
+       return 0
+    fi
+
+   # Exit if nothing in changes directory
+   if [ `ls -1 -A "$2" | wc -l` = 0 ]; then
+      return 0
+   fi
+
+   # Exit if snapshot isn't enabled in config
+   if [ "$SNAPSHOTS" != "true" ]; then
+      return 0
+   fi
+
+   debug_shell
+   echo_green_star
+   echo "Taking snapshot of persistent changes..."
+
+   cd "$1"
+
+   # Find the number of the last snapshot file
+   SNAPNUM=`find -maxdepth 1 -name "9??-snap.*" | sed 's/.*\///' | sed 's/-.*//' | sort | tail`
+   if [ x$SNAPNUM = x ]; then
+      SNAPNUM=900
+   else
+      SNAPNUM=$(($SNAPNUM + 1))
+   fi
+
+   if [ -e "$2/changes.dat" ]; then
+      mkdir -p /tmp/extch
+      @mount.dynfilefs "$2/changes.dat" 4000 /tmp/extch || return 1
+      mount -o loop,ro -t ext2 /tmp/extch/loop.fs /tmp/extch || return 1
+      cd /tmp/extch
+      if [ -d changes ]; then
+         # overlayfs requires an extra directory level
+         cd changes
+      fi
+   else
+      # Assume we're using native persistent changes
+      cd "$2"
+   fi
+
+   OPTS=""
+   if grep -q snapshotquick /proc/cmdline; then
+      # Disable compression if 'quick' was requested
+      OPTS="-noI -noD -noF -noX"
+   fi
+   create_bundle . "$1/$SNAPNUM-snap.$BEXT" $OPTS || return 1
+
+   cd /
+   if [ -d /tmp/extch ]; then
+      umount /tmp/extch
+      umount /tmp/extch
+   fi
+
+   rm -rf "$2"
+   mkdir "$2"
+}
 
 # Copy content of rootcopy directory to union
 # $1 = data directory
