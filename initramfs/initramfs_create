@@ -131,6 +131,16 @@ if [ "$BOOTFSCK" = "true" ]; then
     for tool in $FSCKTOOLS; do
         copy_including_deps /sbin/$tool
     done
+
+    # fsck.ext? are actually one-line shell scripts... that use
+    # /bin/bash. WHY??
+    for tool in "$INITRAMFS"/sbin/fsck.ext?; do
+        if [ -e "$tool" ]; then
+            sed "s/#\!\/bin\/bash/#\!\/bin\/sh/" < "$tool" > "$tool.fix"
+            mv "$tool.fix" "$tool"
+            chmod a+x "$tool"
+        fi
+    done
 fi
 
 find $INITRAMFS -name "*.ko.gz" -exec gunzip {} \;
