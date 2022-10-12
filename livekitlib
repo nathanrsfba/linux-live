@@ -699,7 +699,7 @@ persistent_changes()
 # $2 = changes directory on data medium
 take_snapshot()
 {
-   local SNAPNUM
+   local SNAPNUM OPTS
 
    debug_log "take_snapshot" "$*"
    debug_shell
@@ -747,7 +747,12 @@ take_snapshot()
       cd "$2"
    fi
 
-   create_bundle . "$1/$SNAPNUM-snap.$BEXT" || return 1
+   OPTS=""
+   if grep -q snapshotquick /proc/cmdline; then
+      # Disable compression if 'quick' was requested
+      OPTS="-noI -noD -noF -noX"
+   fi
+   create_bundle . "$1/$SNAPNUM-snap.$BEXT" $OPTS || return 1
 
    cd /
    if [ -d /tmp/extch ]; then
