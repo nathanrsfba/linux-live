@@ -657,6 +657,8 @@ persistent_changes()
       return
    fi
 
+   take_snapshot "$1" "$CHANGES"
+
    echo_green_star
    echo "Testing persistent changes for posix compatibility"
    touch "$T1" && ln -sf "$T1" "$T2" 2>/dev/null && \
@@ -691,6 +693,64 @@ persistent_changes()
    rmdir "$2/lost+found" 2>/dev/null
 }
 
+# Snapshot change image into a new module file, and create a new
+# change image
+# $1 = bundles directory
+# $2 = changes directory on data medium
+take_snapshot()
+{
+   local SNAPNUM
+
+    debug_log "take_snapshot" "$*"
+
+    # FIXME: This needs to be tested with aufs, and adapted for
+    # native persistent changes
+
+   if grep -vq snapshot /proc/cmdline; then
+       return 0
+   fi
+
+   if [ ! -e "$2/changes.dat" ]; then
+       return 0
+   fi
+
+   if [ "$SNAPSHOTS" != "true" ]; then
+       return 0
+   fi
+
+   debug_shell
+    echo_green_star
+    echo "Taking snapshot of persistent changes..."
+
+    cd "$1"
+
+    # Find the number of the last snapshot file
+    SNAPNUM=`find -maxdepth 1 -name "9??-snap.*" | sed 's/.*\///' | sed 's/-.*//' | sort | tail`
+    if [ x$SNAPNUM = x ]; then
+        SNAPNUM=900
+    else
+        SNAPNUM=$(($SNAPNUM + 1))
+    fi
+
+    mkdir -p /tmp/extch
+    @mount.dynfilefs "$2/changes.dat" 4000 /tmp/extch || return 1
+    mount -o loop,ro -t ext2 /tmp/extch/loop.fs /tmp/extch || return 1
+    cd /tmp/extch
+    if [ -d changes ]; then
+        cd changes
+    fi
+   debug_shell
+
+    create_bundle . "$1/$SNAPNUM-snap.$BEXT" || return 1
+   debug_shell
+
+    cd /
+    umount /tmp/extch
+    umount /tmp/extch
+   debug_shell
+
+    rm "$2/changes.dat"
+}
 
 # Copy content of rootcopy directory to union
 # $1 = data directory
