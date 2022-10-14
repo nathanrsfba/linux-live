@@ -21,7 +21,11 @@ Currently, the following changes have been made to the original code:
   on boot, if enabled in config.
 * Compression options for mksquashfs can now be specified in config. I've
   heard reports that lzo compression might yield better performance when
-  running a linux-live system on older hardware
+  running a linux-live system on older hardware.
+
+  Note that this does not affect the scripts in the Slax/ directory, as they
+  don't use the create_bundle function in livekitlib. I don't want to mess
+  with them at this point as I'm not entirely sure how to go about testing it.
 * Persistent changes can now be 'snapshotted'. Giving the 'snapshot' option on
   boot (along with 'perch') will create a new bundle (in the 900 serires) with
   the changes from the persistent snapshot image. The changes image will then
