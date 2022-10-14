@@ -765,13 +765,14 @@ take_snapshot()
       @mount.dynfilefs "$2/changes.dat" 4000 /tmp/extch || return 1
       mount -o loop,ro -t ext2 /tmp/extch/loop.fs /tmp/extch || return 1
       cd /tmp/extch
-      if [ -d changes ]; then
-         # overlayfs requires an extra directory level
-         cd changes
-      fi
    else
       # Assume we're using native persistent changes
       cd "$2"
+   fi
+
+   if [ -d changes ]; then
+       # overlayfs requires an extra directory level
+       cd changes
    fi
 
    OPTS=""
