@@ -637,11 +637,40 @@ check_data_found()
 # $1 = device
 fsck_device()
 {
+   local ANSWER RETRY
    FS="$(device_tag "$1" TYPE | tr [A-Z] [a-z])"
    if [ -x /sbin/"fsck.$FS" ]; then
-       echo ""
-       echo "* Checking filesystem on $1"
-       /sbin/"fsck.$FS" -p "$1"
+      echo ""
+      echo "* Checking filesystem on $1"
+      /sbin/"fsck.$FS" -p "$1"
+      if [ $? -ge 4 ]; then
+         echo "-----------------------------------------------------------"
+         echo -n "fsck reported errors that could not "
+         echo "be automatically repaired."
+         RETRY=true
+         while $RETRY; do
+            RETRY=false
+            echo -n "Run again in interactive mode "
+            echo -n "[y]es, [n]o, fix [a]ll? "
+            read ANSWER < /dev/console
+            case $ANSWER in
+               y)
+                  /sbin/"fsck.$FS" "$1"
+                  ;;
+               a)
+                  /sbin/"fsck.$FS" -y "$1"
+                  ;;
+               n)
+                  echo "A shell will be spawned so you may effect repairs."
+                  echo "When finsihed, simply 'exit' to continue booting."
+                  /bin/sh
+                  ;;
+               *)
+                  RETRY=true
+                  ;;
+            esac
+         done
+      fi
    fi
 
    return 0
@@ -711,7 +740,7 @@ persistent_changes()
 
    if [ $BOOTFSCK = "true" ]; then
        echo "* Checking persistence image..."
-       e2fsck -p "$2/loop.fs"
+       fsck_device "$2/loop.fs" >&2
    fi
    mount -o loop,sync "$2/loop.fs" "$2"
 
