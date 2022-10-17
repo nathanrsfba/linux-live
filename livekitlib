@@ -708,7 +708,7 @@ persistent_changes()
 
    if [ $BOOTFSCK = "true" ]; then
        echo "* Checking persistence image..."
-       e2fsck -p "$2/loop.fs"
+       fsck_device "$2/loop.fs" >&2
    fi
    mount -o loop,sync "$2/loop.fs" "$2"
 
