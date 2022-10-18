@@ -23,6 +23,9 @@ VMLINUZ=/boot/vmlinuz
 # Live Kit with a different kernel than the one you are actually running
 KERNEL=$(uname -r)
 
+# Try to detect it from the installed packages in the target system
+KERNEL=`basename /var/log/packages/kernel-generic-* | cut -d - -f 3`
+
 # List of directories for root filesystem
 # No subdirectories are allowed, no slashes,
 # so You can't use /var/tmp here for example
