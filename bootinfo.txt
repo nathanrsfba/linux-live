@@ -21,24 +21,66 @@ repairing crashed systems. However, as a full (depending on how this
 particulary copy was built) Slackware installation, it has all the power of
 Slackware available to it.
 
-SlakResQ Tweaks
----------------
+Using SlakResQ
+--------------
 
 While this is more or less a 'stock' Slackware install, a few amenities have
 been added:
 
-* Several default boot configurations will now boot directly into X without
-  updating inittab
-* When starting X with startx (or a display manager that doesn't offer
-  selection of sessions), the default session is a script that tries to pick
-  the best session available based on what is installed (which can change from
-  boot to boot depending on bundle selection)
-* When starting for the first time, the root password will be set to a random
-  password, a regular user will be created with the same password, and a
-  message will be displayed with login details at the first login prompt. If X
-  is installed, the new user will be automatically logged in, with a similar
-  message displayed. Both messages will disappear once either account password
-  has been changed (or a new user added)
+* The default configuration will attempt to boot directly into X if it's
+  installed.
+* The root password is set randomly upon first boot. A message displays on the
+  first virtual terminal (and on X if it's installed) giving the password
+  until either it gets changed, or another user added.
+* By default, anyone in the wheel group as access to sudo. They will be asked
+  for their own password (not root's) when using it.
+* If using xdm as the display manager (the default if KDE is not installed),
+  some buttons will appear in the corner to shutdown or restart the system
+  without logging in.
+
+Like Slax, SlakResQ is modular: You can add modules to the `slakresq` folder,
+and they will be merged into the root filesystem upon boot. They are loaded in
+ASCII sort order; as such, it can be useful to prefix them with numbers to
+control the order they load in. The default modules do so.
+
+You can also create a `rootcopy` folder in the slakresq folder. Anything in
+here will be copied to the root directory on boot. This can be used to
+customize a particular install without having to recreate modules.
+
+You can convert a Slackware package, or set of packages, into a module using
+the included pkg2bundle tool from within a SlakResQ instance. Pass it the name
+of a module to create, and one or more Slackware packages, and it will create
+and install a SlakResQ module that will be activated at the next boot.
+
+By default this creates a tmpfs filesystem in memory to use for temporary
+space, due to some technical limitations in overlayfs. This may run out of
+memory if you're trying to make a very large module. If you have access to a
+Posix-compliant filesystem, you can specify a path to use as a temporary
+workspace using the -t option.
+
+AlienBob's repository (http://www.slackware.com/~alien/slackbuilds/) is a good
+source of Slackware packages for common apps, and slackbuilds.org provides
+many scripts for building software into Slackware packages.
+
+The following options can be specified on the boot command line from syslinux:
+
+* perch: Activate persistent changes. These will be saved in the `changes`
+  folder under `slakresq`. The default boot option does this.
+* snapshot: Save any persistent changes to a module in the `slakresq` folder.
+  This can be useful if the changes image file gets full, or if you want to
+  compress it to save space.  This can be done multiple times, saving to a new
+  module each time. This may delay the boot process a bit while the image is
+  compressed; you can also use `snapshotquick` to make an uncompressed module,
+  which is faster but takes up more space.
+* toram: Copy all modules to a ramdisk before booting; this allows the boot
+  media to be unmounted and removed.
+* noload=<regex>: Specify a set of modules to prevent loading. This is a
+  regular expression, so you can simply specify a list of modules separated by
+  the | character.
+* from=<dir>: Look for data in the given folder, instead of `slakresq`
+* 4: Boots into runlevel 4 (instead of the default 3), which autostarts X. The
+  default boot menu option does this.
+
 
 Installing onto USB
 -------------------
