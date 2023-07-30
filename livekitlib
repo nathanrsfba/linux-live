@@ -782,7 +782,7 @@ take_snapshot()
    cd "$1"
 
    # Find the number of the last snapshot file
-   SNAPNUM=`find -maxdepth 1 -name "9??-snap.*" | sed 's/.*\///' | sed 's/-.*//' | sort | tail`
+   SNAPNUM=`find -maxdepth 1 -name "9??-snap.*" | sed 's/.*\///' | sed 's/-.*//' | sort | tail -n 1`
    if [ x$SNAPNUM = x ]; then
       SNAPNUM=900
    else
