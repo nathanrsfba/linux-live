@@ -736,15 +736,16 @@ take_snapshot()
    if [ -e "$2/changes.dat" ]; then
       mkdir -p /tmp/extch
       @mount.dynfilefs "$2/changes.dat" 4000 /tmp/extch || return 1
-      mount -o loop,ro -t ext2 /tmp/extch/loop.fs /tmp/extch || return 1
+      mount -o loop -t ext2 /tmp/extch/loop.fs /tmp/extch || return 1
       cd /tmp/extch
-      if [ -d changes ]; then
-         # overlayfs requires an extra directory level
-         cd changes
-      fi
    else
       # Assume we're using native persistent changes
       cd "$2"
+   fi
+
+   if [ -d changes ]; then
+       # overlayfs requires an extra directory level
+       cd changes
    fi
 
    OPTS=""
@@ -752,16 +753,24 @@ take_snapshot()
       # Disable compression if 'quick' was requested
       OPTS="-noI -noD -noF -noX"
    fi
-   create_bundle . "$1/$SNAPNUM-snap.$BEXT" $OPTS || return 1
+
+   # Nuke /tmp and exclude /home
+   rm -rf tmp
+   mkdir tmp
+   for f in *; do
+       if [ $f != home -a $f != tmp ]; then
+           mv "$f" tmp
+       fi
+   done
+   create_bundle tmp "$1/$SNAPNUM-snap.$BEXT" $OPTS || return 1
+
+   rm -rf tmp
 
    cd /
    if [ -d /tmp/extch ]; then
       umount /tmp/extch
       umount /tmp/extch
    fi
-
-   rm -rf "$2"
-   mkdir "$2"
 }
 
 # Copy content of rootcopy directory to union
