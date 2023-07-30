@@ -27,18 +27,18 @@ Currently, the following changes have been made to the original code:
   don't use the create_bundle function in livekitlib. I don't want to mess
   with them at this point as I'm not entirely sure how to go about testing it.
 * Persistent changes can now be 'snapshotted'. Giving the 'snapshot' option on
-  boot (along with 'perch') will create a new bundle (in the 900 serires) with
-  the changes from the persistent snapshot image. The changes image will then
-  be deleted and recreated. This will yield a 'fresh' change image with the
-  full ~4G free space.
+  boot (along with 'perch') will create a new bundle (with a 900 serires) with
+  system changes from the persistent snapshot image, then delete them from the
+  changes image. This will free up space in the changes image, and on the
+  underlying storage media.
+
+  Note that home folders are not snapshotted; they remain in the changes
+  image. /tmp is also not snapshotted, and is deleted before taking a
+  snapshot.
 
   You can also specify 'snapshotquick' which will disable compression on the
   resulting snapshot. The file will be much larger, but the snapshot process
   will be much faster.
-
-  You can roll back to the most recent snapshot by deleting the changes
-  image/folder and rebooting. You can also roll back further by deleting the
-  snapshot bundles in reverse order.
 
   This should work whether you're using overlayfs or aufs, and whether you're
   using a changes image on a non-posix filesystem, or 'native' persistent
