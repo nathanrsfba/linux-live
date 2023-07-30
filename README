@@ -43,6 +43,8 @@ Currently, the following changes have been made to the original code:
   This should work whether you're using overlayfs or aufs, and whether you're
   using a changes image on a non-posix filesystem, or 'native' persistent
   changes.
+* The loop module is now explicitly loaded with "max_loop=0", which means "no
+  limit", in case a partuclar kernel's default is configured differently
 
 These changes have all been broken out into individual branches, so they may
 be individually merged into the upstream if desired.
