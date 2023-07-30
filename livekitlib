@@ -187,7 +187,7 @@ init_devs()
 {
    debug_log "init_devs" "$*"
    modprobe zram 2>/dev/null
-   modprobe loop 2>/dev/null
+   modprobe loop max_loop=255 2>/dev/null
    modprobe squashfs 2>/dev/null
    modprobe fuse 2>/dev/null
    refresh_devs
