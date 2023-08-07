@@ -766,7 +766,7 @@ take_snapshot()
 
    if [ -e "$2/$3" ]; then
       mkdir -p /tmp/extch
-      @mount.dynfilefs -f "$2/$3" -s "$4" -m "$2" -p "$5"
+      @mount.dynfilefs -f "$2/$3" -s "$4" -m /tmp/extch -p "$5"
       mount -o loop -t ext2 /tmp/extch/virtual.dat /tmp/extch || return 1
       cd /tmp/extch
    else
