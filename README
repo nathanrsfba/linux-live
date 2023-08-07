@@ -1,3 +1,50 @@
+Linux Live Kit Fork
+===================
+
+This is a fork of Tomas Matejicek's Linux Live Kit. The purpose of this fork
+is for me to experiment with some tweaks and fixes of my own.
+
+Currently, the following changes have been made to the original code:
+
+* The boot scripts now pass parameters from the bootloader to the 'real' init
+  process. This enables setting the runlevel from the boot prompt.
+* Boot scripts will now try to fsck the source media (and persistence image)
+  on boot, if enabled in config.
+* Compression options for mksquashfs can now be specified in config. I've
+  heard reports that lzo compression might yield better performance when
+  running a linux-live system on older hardware.
+
+  Note that this does not affect the scripts in the Slax/ directory, as they
+  don't use the create_bundle function in livekitlib. I don't want to mess
+  with them at this point as I'm not entirely sure how to go about testing it.
+* Persistent changes can now be 'snapshotted'. Giving the 'snapshot' option on
+  boot (along with 'perch') will create a new bundle (with a 900 serires) with
+  system changes from the persistent snapshot image, then delete them from the
+  changes image. This will free up space in the changes image, and on the
+  underlying storage media.
+
+  Note that home folders are not snapshotted; they remain in the changes
+  image. /tmp is also not snapshotted, and is deleted before taking a
+  snapshot.
+
+  You can also specify 'snapshotquick' which will disable compression on the
+  resulting snapshot. The file will be much larger, but the snapshot process
+  will be much faster.
+
+  This should work whether you're using overlayfs or aufs, and whether you're
+  using a changes image on a non-posix filesystem, or 'native' persistent
+  changes.
+
+These changes have all been broken out into individual branches, so they may
+be individually merged into the upstream if desired.
+
+Changes that were made previously, that have since been (independently) fixed
+in the upstream:
+* Fixed shutdowns not working properly
+* Loop module now gets a max_loop parameter, in case the default is too low
+
+- Nathan Roberts <nathanr@tardislabs.com>
+
 Linux Live Kit
 ==============
 
