@@ -764,7 +764,7 @@ take_snapshot()
       SNAPNUM=$(($SNAPNUM + 1))
    fi
 
-   if [ -e "$2/$3" ]; then
+   if [ "$3" != "" -a -e "$2/$3" ]; then
       mkdir -p /tmp/extch
       @mount.dynfilefs -f "$2/$3" -s "$4" -m /tmp/extch -p "$5"
       mount -o loop -t ext2 /tmp/extch/virtual.dat /tmp/extch || return 1
