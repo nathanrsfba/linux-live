@@ -136,7 +136,7 @@ transfer_initramfs()
       cp -a /??* $SWITCH 2>/dev/null # only copy two-and-more-letter directories
       cd $SWITCH
       echo "This file indicates that we successfully escaped initramfs" > $SWITCH/lib/initramfs_escaped
-      exec switch_root -c /dev/console . $0
+      exec switch_root -c /dev/console . $0 $*
    fi
 }
 
@@ -942,5 +942,6 @@ change_root()
    mkdir -p run/initramfs
    mount -n -o remount,ro aufs .
    pivot_root . run/initramfs
-   exec $CHROOT . $INIT < dev/console > dev/console 2>&1
+   shift
+   exec $CHROOT . $INIT $* < dev/console > dev/console 2>&1
 }
