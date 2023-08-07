@@ -13,8 +13,6 @@ is for me to experiment with some tweaks and fixes of my own.
 
 Currently, the following changes have been made to the original code:
 
-* The shutdown script in initramfs now calls poweroff with the '-f' argument,
-  which fixes the bug causing reboots instead of poweroffs
 * The boot scripts now pass parameters from the bootloader to the 'real' init
   process. This enables setting the runlevel from the boot prompt.
 * Boot scripts will now try to fsck the source media (and persistence image)
@@ -43,11 +41,14 @@ Currently, the following changes have been made to the original code:
   This should work whether you're using overlayfs or aufs, and whether you're
   using a changes image on a non-posix filesystem, or 'native' persistent
   changes.
-* The loop module is now explicitly loaded with "max_loop=0", which means "no
-  limit", in case a partuclar kernel's default is configured differently
 
 These changes have all been broken out into individual branches, so they may
 be individually merged into the upstream if desired.
+
+Changes that were made previously, that have since been (independently) fixed
+in the upstream:
+* Fixed shutdowns not working properly
+* Loop module now gets a max_loop parameter, in case the default is too low
 
 - Nathan Roberts <nathanr@tardislabs.com>
 

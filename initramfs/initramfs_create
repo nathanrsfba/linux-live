@@ -51,6 +51,8 @@ cp static/mount.dynfilefs $INITRAMFS/bin/@mount.dynfilefs
 cp static/mount.httpfs2 $INITRAMFS/bin/@mount.httpfs2
 cp static/blkid $INITRAMFS/bin
 chmod a+x $INITRAMFS/bin/*
+mkdir -p $INITRAMFS/etc/modprobe.d
+echo "options loop max_loop=32" >$INITRAMFS/etc/modprobe.d/local-loop.conf
 
 $INITRAMFS/bin/busybox | grep , | grep -v Copyright | tr "," " " | while read LINE; do
    for TOOL in $LINE; do
@@ -96,7 +98,7 @@ copy_including_deps /$LMK/kernel/drivers/block/zram
 copy_including_deps /$LMK/kernel/drivers/block/loop.*
 
 # usb drivers
-copy_including_deps /$LMK/kernel/drivers/usb/storage/usb-storage.*
+copy_including_deps /$LMK/kernel/drivers/usb/storage
 copy_including_deps /$LMK/kernel/drivers/usb/host
 copy_including_deps /$LMK/kernel/drivers/usb/common
 copy_including_deps /$LMK/kernel/drivers/usb/core
