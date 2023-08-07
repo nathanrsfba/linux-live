@@ -45,6 +45,10 @@ BOOTFSCK=true
 # must exist in the Linux installation you're building.
 FSCKTOOLS="e2fsck fsck.ext2 fsck.ext3 fsck.ext4 fsck.fat fsck.msdos fsck.vfat"
 
+# Enable support to enable persistent storage snapshots. This will add
+# mksquashfs to the initramfs
+SNAPSHOTS=true
+
 # Temporary directory to store livekit filesystem
 LIVEKITDATA=/tmp/$LIVEKITNAME-data-$$
 

@@ -724,6 +724,7 @@ persistent_changes()
          if device_bestfs $DEVICE | grep -v ntfs >/dev/null; then
             echo "* Activating native persistent changes"
             mount --bind "$CHANGES" "$2"
+            take_snapshot "$1" "$CHANGES"
             return
          fi
       fi
@@ -748,6 +749,8 @@ persistent_changes()
    if [ -e "$CHANGES/$PERCHFILE.$SUFFIX" -a ! -e "$CHANGES/$PERCHFILE" ]; then
       dd if="$CHANGES/$PERCHFILE.$SUFFIX" of="$CHANGES/$PERCHFILE" bs=4k count=1
    fi
+
+   take_snapshot "$1" "$CHANGES" "$PERCHFILE" "$PERCHSIZE" "$SPLITSIZE"
 
    # restore or use new
    if [ -e "$CHANGES/$PERCHFILE" ]; then
@@ -774,6 +777,88 @@ persistent_changes()
    rmdir "$2/lost+found" 2>/dev/null
 }
 
+# Snapshot change image into a new module file, and create a new
+# change image
+# $1 = bundles directory
+# $2 = changes directory on data medium
+# $3 = changes image filename (if not native)
+# $4 = changes image size (if not native)
+# $5 = changes image split size (if not native)
+take_snapshot()
+{
+   local SNAPNUM OPTS
+
+   debug_log "take_snapshot" "$*"
+   debug_shell
+
+    # Exit if snapshot not requested
+    if grep -vq snapshot /proc/cmdline; then
+       return 0
+    fi
+
+   # Exit if nothing in changes directory
+   if [ `ls -1 -A "$2" | wc -l` = 0 ]; then
+      return 0
+   fi
+
+   # Exit if snapshot isn't enabled in config
+   if [ "$SNAPSHOTS" != "true" ]; then
+      return 0
+   fi
+
+   debug_shell
+   echo_green_star
+   echo "Taking snapshot of persistent changes..."
+
+   cd "$1"
+
+   # Find the number of the last snapshot file
+   SNAPNUM=`find -maxdepth 1 -name "9??-snap.*" | sed 's/.*\///' | sed 's/-.*//' | sort | tail -n 1`
+   if [ x$SNAPNUM = x ]; then
+      SNAPNUM=900
+   else
+      SNAPNUM=$(($SNAPNUM + 1))
+   fi
+
+   if [ -e "$2/$3" ]; then
+      mkdir -p /tmp/extch
+      @mount.dynfilefs -f "$2/$3" -s "$4" -m "$2" -p "$5"
+      mount -o loop -t ext2 /tmp/extch/virtual.dat /tmp/extch || return 1
+      cd /tmp/extch
+   else
+      # Assume we're using native persistent changes
+      cd "$2"
+   fi
+
+   if [ -d changes ]; then
+       # overlayfs requires an extra directory level
+       cd changes
+   fi
+
+   OPTS=""
+   if grep -q snapshotquick /proc/cmdline; then
+      # Disable compression if 'quick' was requested
+      OPTS="-noI -noD -noF -noX"
+   fi
+
+   # Nuke /tmp and exclude /home
+   rm -rf tmp
+   mkdir tmp
+   for f in *; do
+       if [ $f != home -a $f != tmp ]; then
+           mv "$f" tmp
+       fi
+   done
+   create_bundle tmp "$1/$SNAPNUM-snap.$BEXT" $OPTS || return 1
+
+   rm -rf tmp
+
+   cd /
+   if [ -d /tmp/extch ]; then
+      umount /tmp/extch
+      umount /tmp/extch
+   fi
+}
 
 # Copy content of rootcopy directory to union
 # $1 = data directory
