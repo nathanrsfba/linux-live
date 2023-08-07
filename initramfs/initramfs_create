@@ -129,6 +129,16 @@ copy_including_deps /$LMK/updates
 copy_including_deps /$LMK/modules.*
 
 
+# copy mksquashfs if extendable changes enabled
+if [ "$SNAPSHOTS" = "true" ]; then
+    for tool in $FSCKTOOLS; do
+        copy_including_deps /usr/bin/mksquashfs
+    done
+    # For some reason, mksquashfs needs this even though it's not
+    # actually linked according to ldd!
+    copy_including_deps /usr/lib*/libgcc_s.so.1
+fi
+
 find $INITRAMFS -name "*.ko.gz" -exec gunzip {} \;
 
 # trim modules.order file. Perhaps we could remove it entirely

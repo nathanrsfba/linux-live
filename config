@@ -36,6 +36,10 @@ MKMOD="bin etc home lib lib64 opt root sbin srv usr var"
 # To enable, set to true
 NETWORK=false
 
+# Enable support to enable persistent storage snapshots. This will add
+# mksquashfs to the initramfs
+SNAPSHOTS=true
+
 # Temporary directory to store livekit filesystem
 LIVEKITDATA=/tmp/$LIVEKITNAME-data-$$
 
