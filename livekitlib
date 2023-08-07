@@ -549,6 +549,14 @@ find_data_try()
 
       $MOUNT "$DEVICE" "$1" $OPTIONS 2>/dev/null
 
+      # If this device looks like the source media, see if we should
+      # fsck it
+      if [ $BOOTFSCK = "true" -a -e "$1/$FROM" ]; then
+          umount "$DEVICE"
+          fsck_device "$DEVICE" >&2
+          $MOUNT "$DEVICE" "$1" $OPTIONS 2>/dev/null
+      fi
+
       # if the FROM parameter is actual file, mount it again as loop (eg. iso)
       if [ -f "$1/$FROM" ]; then
          mkdir -p "$1/../iso"
@@ -625,6 +633,48 @@ check_data_found()
    fi
 }
 
+# Run fsck on the specified device
+# $1 = device
+fsck_device()
+{
+   local ANSWER RETRY
+   FS="$(device_tag "$1" TYPE | tr [A-Z] [a-z])"
+   if [ -x /sbin/"fsck.$FS" ]; then
+      echo ""
+      echo "* Checking filesystem on $1"
+      /sbin/"fsck.$FS" -p "$1"
+      if [ $? -ge 4 ]; then
+         echo "-----------------------------------------------------------"
+         echo -n "fsck reported errors that could not "
+         echo "be automatically repaired."
+         RETRY=true
+         while $RETRY; do
+            RETRY=false
+            echo -n "Run again in interactive mode "
+            echo -n "[y]es, [n]o, fix [a]ll? "
+            read ANSWER < /dev/console
+            case $ANSWER in
+               y)
+                  /sbin/"fsck.$FS" "$1"
+                  ;;
+               a)
+                  /sbin/"fsck.$FS" -y "$1"
+                  ;;
+               n)
+                  echo "A shell will be spawned so you may effect repairs."
+                  echo "When finsihed, simply 'exit' to continue booting."
+                  /bin/sh
+                  ;;
+               *)
+                  RETRY=true
+                  ;;
+            esac
+         done
+      fi
+   fi
+
+   return 0
+}
 
 # Activate persistent changes
 # $1 = data directory
@@ -711,6 +761,11 @@ persistent_changes()
    @mount.dynfilefs -f "$CHANGES/$PERCHFILE" -s $PERCHSIZE -m "$2" -p $SPLITSIZE
    if [ ! "$EXISTS" ]; then
       mke2fs -F "$2/virtual.dat" >/dev/null 2>&1
+   fi
+
+   if [ $BOOTFSCK = "true" ]; then
+       echo "* Checking persistence image..."
+       fsck_device "$2/virtual.dat" >&2
    fi
    mount -o loop "$2/virtual.dat" "$2"
 
