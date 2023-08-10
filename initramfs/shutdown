@@ -64,6 +64,10 @@ done
 
 umount_all /memory
 
+echo "Syncing..."
+sync
+sleep 3
+
 # eject cdrom device if we were running from it
 for i in $(cat /proc/sys/dev/cdrom/info | grep name); do
    if [ "$DEVICE" = "/dev/$i" ]; then
