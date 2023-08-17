@@ -19,12 +19,25 @@ LIVEKITNAME="slakresq"
 # out of the box.
 VMLINUZ=/boot/vmlinuz
 
-# Kernel version. Change it to "3.2.28" for example, if you are building
-# Live Kit with a different kernel than the one you are actually running
-KERNEL=$(uname -r)
+# Linux Live needs to know the version of the kernel it's installing. Following
+# are several options to specify it.
 
-# Try to detect it from the installed packages in the target system
-KERNEL=`basename /var/log/packages/kernel-generic-* | cut -d - -f 3`
+# Detect it from the running system. Will fail if the target kernel is a
+# different version.
+#KERNEL=$(uname -r)
+
+# Try to detect it from the installed packages in the target system. This will
+# fail if you've supplied a kernel in some way other than a kernel-generic
+# package.
+#KERNEL=`basename /var/log/packages/kernel-generic-* | cut -d - -f 3`
+
+# Run file(1) on the target kernel and see what version it reports. Should work
+# as long as file properly detects the kernel version (and doesn't change its
+# output format too dramatically).
+KERNEL="`file -L "$VMLINUZ" | sed 's/ /\n/g' | grep -A 1 version | tail -1`"
+
+# Or just specify it manually
+#KERNEL=5.15.117
 
 # List of directories for root filesystem
 # No subdirectories are allowed, no slashes,
