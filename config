@@ -34,7 +34,7 @@ VMLINUZ=/boot/vmlinuz
 # Run file(1) on the target kernel and see what version it reports. Should work
 # as long as file properly detects the kernel version (and doesn't change its
 # output format too dramatically).
-KERNEL="`file -L "$VMLINUZ" | sed 's/ /\n/g' | grep -A 1 version | tail -1`"
+KERNEL="`file -L "$VMLINUZ" 2> /dev/null | sed 's/ /\n/g' | grep -A 1 version | tail -1`"
 
 # Or just specify it manually
 #KERNEL=5.15.117
